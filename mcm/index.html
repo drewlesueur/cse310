@@ -1,0 +1,122 @@
+<!doctype html>
+<head>
+  <script src="http://includes.the.tl/jquery.js"></script>
+  <script src="http://includes.the.tl/coffeescript.js"></script>
+  <script src="http://includes.the.tl/underscore.js"></script>
+</head>
+
+<body>
+  <h1>Matrix chain multiplication Solver</h1>
+  <h5>Only works in Google Chrome or Safari</h5>
+  <i>by Drew LeSueur</i>
+  <br>
+  <i>CSE310 at ASU</i>
+  <br>
+  <i>22 Nov 2010</i>
+<script type='text/coffeescript'>
+mcm = (p) ->
+  console.log "test"
+  m = []
+  s = []
+  n = p.length - 1
+  $(document.body).css "height", "20000px"
+  table = ["<table id='mcm' cellpadding=0 cellspacing=0 style='border-collapse: collapse; -webkit-transform: rotate(135deg) translate(-100px, -300px); '>"]
+  for a in [1..n]
+    table.push "<tr colspan='a'>"
+    for b in [1..a]
+      table.push "<td id='mcm_#{n-a+1}_#{n-b+1}' style='border:1px solid black; width: 50px; height: 50px;'>
+        <div style='-webkit-transform: rotate(-135deg);'>0</div>
+      </td>"
+    table.push "</tr>"
+  table.push "</table>" 
+  $('#mcm').remove()
+  $(document.body).append table.join "\n"
+      
+  ss = "" 
+  for i in [1..n]
+    m[i] = []
+    m[i][i] = 0
+    s[i] = []
+  for L in [2..n]
+    for i in [1..n-L+1]
+      j = i+L-1
+      m[i][j] = Infinity
+      $("#mcm_#{i}_#{j}").find("div").text "infinity"
+      for k in [i..j-1]
+        q = m[i][k] + m[k+1][j] + p[i-1]*p[k]*p[j]
+        if q < m[i][j]
+          m[i][j] = q
+          $("#mcm_#{i}_#{j}").find("div").text q
+          
+          s[i][j] = k
+          console.log "s[#{i}][#{j}] = #{k}"
+          ss += "s[#{i}][#{j}] = #{k}<br/>"
+        else
+          #console.log q, m[i][j]
+          #console.log "nothing"
+  window.s = s
+  Answer = "A#{a}" for a in [1..n]
+  Answer.splice 0,0, "blank"
+  str = ""
+  getsplit = (min, max) ->
+    if max - min <= 0 
+      console.log "returning literal " + Answer[min]
+      return Answer[min]
+    right = s[min][max]
+    #ss += "s[#{min},#{max}]=#{right}<br>"
+    left_side = Answer.slice min, right + 1
+    console.log "left_side", left_side, min, right 
+    left_side = getsplit min, right
+    right_side = Answer.slice right+1, max + 1
+    console.log "right_side", right_side, right + 1, max
+    right_side = getsplit right + 1, max
+    console.log "returning", [left_side, right_side]
+    return [left_side, right_side]  
+  console.log Answer 
+  console.log "this is a test"
+  Answer = getsplit(1,n)
+
+  print = (Answer) ->
+    if _.isArray Answer
+      str += "("
+      for i in Answer.slice 0, Answer.length-1
+        print i
+        str += "*"
+      print Answer[Answer.length - 1]
+      str += ")"
+    else
+      str += Answer
+  print Answer
+  $('#ans').remove()
+  $(document.body).append $ "<div id='ans'>#{str} <br> #{ss}</div>"
+$(document).ready () ->
+  console.log $('form')
+  $('form').submit (e) ->
+    e.preventDefault()
+    p = $('#ps').val()
+    p = p.replace /[\D]/g, " "
+    p = p.replace /[\s]+/g, " "
+    console.log p
+    p = p.split " "
+    mcm (p)
+    return false  
+  
+   
+#mcm  [45, 22, 30, 20, 15]
+#mcm [50, 20, 40, 30, 10]
+
+#mcm [30, 35, 15, 5, 10, 20, 25]
+  
+  
+</script>
+
+<br>
+<br>
+<form action="#">
+
+  Enter the list of P's (whatever those are)<br>  <input type="text" id="ps">
+  <input type="submit" value="Go!">
+</form>
+
+ 
+  

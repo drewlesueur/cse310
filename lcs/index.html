@@ -1,0 +1,112 @@
+
+<!doctype html>
+<head>
+  <script src="http://includes.the.tl/jquery.js"></script>
+  <script src="http://includes.the.tl/coffeescript.js"></script>
+  <script src="http://includes.the.tl/underscore.js"></script>
+</head>
+
+<body>
+  <h1>Longest common subsequence Solver</h1>
+  <h5>Only works in Google Chrome or Safari</h5>
+  <i>by Drew LeSueur</i>
+  <br>
+  <i>CSE310 at ASU</i>
+  <br>
+  <i>23 Nov 2010</i>
+<script type='text/coffeescript'>
+lcs_length = (x,y) -> #1 indexed arrays
+  m = x.length - 1
+  n = y.length - 1 
+  c = []
+  b = []
+  for i in [0..m]
+    c[i] = []
+    b[i] = []
+    c[i][0] = 0
+  for j in [1..n]
+    c[0][j] = 0
+  for i in [1..m]
+    for j in [1..n]
+      if x[i] == y[j]
+        c[i][j] = c[i-1][j-1] + 1
+        b[i][j] = "\u2196"
+      else if c[i-1][j] >= c[i][j-1]
+        c[i][j] = c[i-1][j]
+        b[i][j] = "\u2191"
+      else
+        c[i][j] = c[i][j-1]
+        b[i][j] = "\u2190"
+  
+  str  = ["<table id='lcs' border=1>"]
+  str.push "<tr>"
+  str.push "<td></td>"
+  str.push "<td>j</td>"
+  for i in [0..n]
+    str.push "<td>#{i}</td>"
+  str.push "</tr>"
+  str.push "<tr>"
+  str.push "<td>i</td>"
+  str.push "<td>c[i,j]</td>"
+  for i in [0..n]
+    if i is 0
+      str.push "<td>yj=</td>"
+    else
+      str.push "<td>#{y[i]}</td>"
+  str.push "</tr>"
+  
+  for i in [0..m]
+    str.push "<tr>"
+    str.push "<td>#{i}</td>"
+    if i is 0
+      str.push "<td>#{i}</td>"
+    else
+      str.push "<td>#{x[i]}</td>"
+    for j in [0..n]
+      str.push """<td id="cell_#{i}_#{j}">#{c[i][j]} #{b[i][j] || ''}</td>"""
+    str.push "</tr>" 
+    $('#lcs').remove()
+    $(document.body).append str.join "" 
+  return [c,b]
+  
+construct_lcs = (b, x, y, i, j) ->
+  $("#cell_#{i}_#{j}").css "background-color", "#c0c0c0"
+  if i is 0 or j is 0
+    $('#ans').remove()
+    if i is 0
+      $(document.body).append $ "<div id='ans'><b>#{x[1]} #{y[j]}</b></div>"
+    if j is 0
+      $(document.body).append $ "<div id='ans'><b>#{x[i]} #{y[1]}</b></div>"
+    return
+  if b[i][j] == "\u2196"
+    construct_lcs b, x, y, i-1, j-1
+    console.log x[i]
+  else if b[i][j] == "\u2191"
+    construct_lcs b, x, y, i-1, j
+  else
+    construct_lcs b, x, y,  i, j-1
+
+
+$(document).ready () ->
+  $('form').submit (e) ->
+    e.preventDefault()
+    ps = $('#ps').val()
+    ps = ps.replace /[\s]+/, " "
+    ps = ps.split " "
+    ps[0] = (" " + ps[0]).split ""
+    ps[1] = (" " + ps[1]).split ""
+    [c, b] = lcs_length ps[0], ps[1]
+    construct_lcs b, ps[0], ps[1], ps[0].length -1, ps[1].length - 1
+    return false
+</script>
+
+<br>
+<br>
+<form action="#">
+
+ <br>  <input type="text" id="ps" value="ABCBDAB BDCABA">
+  <input type="submit" value="Go!">
+</form>
+
+ 
+  
